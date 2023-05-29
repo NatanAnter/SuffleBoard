@@ -6,7 +6,7 @@ import java.util.TimerTask;
 public class Diskette extends Thread {
     public static final int SIZE = 50;
     public static final double SET_UP_SPEED_PX_PER_SECOND = 300;
-    public static final Double SLEEP_IN_SECOND = 0.002;
+    public static final Double SLEEP_IN_SECOND = 0.02;
     public static final int SLEEP_IN_MILLI_SECOND = (int) (SLEEP_IN_SECOND * 1000);
     private static final double MASS = 0.5;
     public static final double G = 9.8;
@@ -66,6 +66,9 @@ public class Diskette extends Thread {
 
     public boolean isMoving() {
         return this.status == STATUS.movingInGame || this.status == STATUS.moveToStart || this.status == STATUS.setUp || this.status == STATUS.shoot || this.status == STATUS.restingOutOfFiled;
+    }
+    public boolean isMovingInGame() {
+        return this.status == STATUS.movingInGame;
     }
 
     public Color getColor() {

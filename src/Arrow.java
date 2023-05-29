@@ -38,24 +38,13 @@ public class Arrow {
         this.x += x;
         this.y += y;
     }
-
     public void paint(Graphics graphics) {
-        BufferedImage img = loadImage("Arrow.png");
+        BufferedImage img = Utils.loadImage("Arrow.png");
         this.multiplier = this.radios / img.getHeight();
         AffineTransform at = AffineTransform.getTranslateInstance(x - img.getWidth() * 0.5 * multiplier, y - img.getHeight() * multiplier);
         at.rotate(Math.toRadians(this.degrees), img.getWidth() * 0.5 * multiplier, img.getHeight() * multiplier);
         at.scale(multiplier, multiplier);
         Graphics2D graphics2D = (Graphics2D) graphics;
         graphics2D.drawImage(img, at, null);
-    }
-
-    public BufferedImage loadImage(String fileName) {
-        BufferedImage img = null;
-        try {
-            img = ImageIO.read(new File(fileName));
-        } catch (IOException ignored) {
-            System.out.println("didnt find image");
-        }
-        return img;
     }
 }

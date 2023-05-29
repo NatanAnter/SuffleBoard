@@ -1,4 +1,9 @@
+import javax.imageio.ImageIO;
+import javax.swing.*;
 import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 
 public class Utils {
     public static void sleep(int milliSecond) {
@@ -7,6 +12,21 @@ public class Utils {
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+    }
+    public static ImageIcon loadButtonImage(String fileName, int width, int height){
+        BufferedImage img = loadImage(fileName);
+        Image dimg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        ImageIcon imageIcon = new ImageIcon(dimg);
+        return imageIcon;
+    }
+    public static BufferedImage loadImage(String fileName) {
+        BufferedImage img = null;
+        try {
+            img = ImageIO.read(new File(fileName));
+        } catch (IOException ignored) {
+            System.out.println("didnt find image");
+        }
+        return img;
     }
 
     public static double calculatePosition(double startingPosition, double startingSpeed, double time, double acceleration) {

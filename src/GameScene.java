@@ -15,7 +15,8 @@ public class GameScene extends JPanel implements KeyListener, ActionListener {
     private int blueScore;
     private int redScore;
     private Diskette[] diskettes;
-    private JButton button;
+    private JButton playButton;
+    private JButton playMagicButton;
     private STATUS status;
     public static final int DEGREES_MAX = 90;
     public static final int DEGREES_MIN = -90;
@@ -33,6 +34,12 @@ public class GameScene extends JPanel implements KeyListener, ActionListener {
     private JLabel blueScoreLabel;
     private  JLabel instructionsLabel;
     private boolean isRedFirstPlayer;
+    private boolean isGameWithMagic;
+//    private JButton iceButton;
+    private IceCubeButton iceCubeButton;
+    private JButton bombButton;
+
+
 
     public void redPlayerWonStatus() {
         this.winnerPlayerLabel.setText("RED player Won!");
@@ -59,12 +66,15 @@ public class GameScene extends JPanel implements KeyListener, ActionListener {
 //        for (int i = 0; i < NUMBER_OF_DISKETTES; i++) {
 //            this.diskettes[i] = new Diskette(100 * i, 150 * i, color);
 //        }
+        this.iceCubeButton.getButton().setVisible(true);
         this.instructionsLabel.setVisible(false);
         this.blueScoreLabel.setVisible(false);
         this.redScoreLabel.setVisible(false);
-        this.button.setVisible(true);
+        this.playButton.setVisible(true);
+        this.playMagicButton.setVisible(true);
         this.status = STATUS.playerWon;
     }
+
 
     public GameScene() {
         this.redScore = 0;
@@ -77,14 +87,26 @@ public class GameScene extends JPanel implements KeyListener, ActionListener {
             Utils.sleep(1);
         }
 
+        //buttons:
+        this.playButton = new JButton();
+        this.playButton.setBounds(Window.WINDOW_WIDTH / 2 - BUTTON_WIDTH / 2, Window.WINDOW_HEIGHT / 2 - BUTTON_HEIGHT / 2, BUTTON_WIDTH, BUTTON_HEIGHT);
+        this.playButton.addActionListener(this);
+        this.playButton.setText("play");
+        this.playButton.setFont(new Font("Arial", Font.BOLD, 50));
+        this.playButton.setFocusable(false);
+        this.add(playButton);
 
-        this.button = new JButton();
-        this.button.setBounds(Window.WINDOW_WIDTH / 2 - BUTTON_WIDTH / 2, Window.WINDOW_HEIGHT / 2 - BUTTON_HEIGHT / 2, BUTTON_WIDTH, BUTTON_HEIGHT);
-        this.button.addActionListener(this);
-        this.button.setText("play");
-        this.button.setFont(new Font("Arial", Font.BOLD, 50));
-        this.button.setFocusable(false);
-        this.add(button);
+        this.playMagicButton = new JButton();
+        this.playMagicButton.setBounds(Window.WINDOW_WIDTH / 2 + BUTTON_WIDTH / 2+20, Window.WINDOW_HEIGHT / 2 - BUTTON_HEIGHT / 2, BUTTON_WIDTH*2,BUTTON_HEIGHT);
+        this.playMagicButton.addActionListener(this);
+        this.playMagicButton.setText("play special");
+        this.playMagicButton.setFont(new Font("Arial", Font.BOLD, 50));
+        this.playMagicButton.setVisible(true);
+        this.playMagicButton.setFocusable(false);
+        this.add(playMagicButton);
+
+
+
         this.setFocusable(true);
         this.requestFocus();
         this.status = STATUS.homePage;
@@ -111,8 +133,8 @@ public class GameScene extends JPanel implements KeyListener, ActionListener {
     }
 
     public void showRoad() {
-
-        this.button.setVisible(false);
+        this.playMagicButton.setVisible(false);
+        this.playButton.setVisible(false);
         this.winnerPlayerLabel.setVisible(false);
         this.pressedKeys = new boolean[4];
         this.setBackground(Color.LIGHT_GRAY);
@@ -125,6 +147,14 @@ public class GameScene extends JPanel implements KeyListener, ActionListener {
         this.status = STATUS.playing;
         Utils.sleep(10);
         this.diskettes = null;
+
+        if (isGameWithMagic) {
+            this.iceCubeButton = new IceCubeButton();
+            this.iceCubeButton.getButton().addActionListener(this);
+            this.iceCubeButton.getButton().setFocusable(false);
+            this.iceCubeButton.getButton().setVisible(true);
+            this.add(iceCubeButton.getButton());
+        }
 
     }
 
@@ -172,8 +202,21 @@ public class GameScene extends JPanel implements KeyListener, ActionListener {
     }
 
     public void actionPerformed(ActionEvent e) {
-        if (e.getSource() == button) {
+        if (e.getSource() == playButton) {
             showRoad();
+            this.isGameWithMagic = false;
+        }
+        else if(e.getSource()==playMagicButton){
+            this.isGameWithMagic = true;
+            showRoad();
+        }
+        else if (e.getSource()==iceCubeButton.getButton()) {
+            if(this.road.isRedNowPlaying())
+                this.iceCubeButton.redClicked();
+            else
+                this.iceCubeButton.blueClicked();
+            this.road.iceRoad();
+            System.out.println("noFriction");
         }
     }
 
@@ -183,18 +226,14 @@ public class GameScene extends JPanel implements KeyListener, ActionListener {
                 switch (status) {
                     case homePage -> {
                         handleHomeCollisions();
-//                        for (int i = 0; i < NUMBER_OF_DISKETTES; i++) {
-//                            for (int j = i + 1; j < NUMBER_OF_DISKETTES; j++) {
-//                                if (Utils.checkCollisionBetweenCircles(diskettes[i].getX() + diskettes[i].getSize() / 2.0, diskettes[i].getY() + diskettes[i].getSize() / 2.0, diskettes[i].getSize() / 2.0, diskettes[j].getX() + diskettes[j].getSize() / 2.0, diskettes[j].getY() + diskettes[j].getSize() / 2.0, +diskettes[j].getSize() / 2.0)) {
-//                                    Diskette.calculateCollision(diskettes[i], diskettes[j], FRICTION_K);
-//                                }
-//                            }
-//                        }
                     }
-                    case disketteMovingToStart -> {
+                    case disketteMovingToStart, prepareToShoot, shooting ->{
                         handleCollisions();
                     }
                     case choosePosition -> {
+                        if(isGameWithMagic){
+                            checkButtonsVisibility();
+                        }
                         int dx = 0;
                         if (this.pressedKeys[DOWN] && this.road.getArrowAngel() > DEGREES_MIN)
                             this.road.changeAngle(false);
@@ -209,17 +248,10 @@ public class GameScene extends JPanel implements KeyListener, ActionListener {
                         Utils.sleep(10);
                         handleCollisions();
                     }
-                    case prepareToShoot,shooting-> {
-                        handleCollisions();
-                    }
                     case playing -> {
                         handleCollisions();
-
-                        //////////////////////////////////////////////////////////////////////////////////////////////////////
-
-                        //////////////////////////////////////////////////////////////////////////////////////////////////////
+                        Utils.sleep(10);
                         if (this.road.endGame()) {
-                            System.out.println("engGame");
                             this.redScore += this.road.calculateScores()[0];
                             this.blueScore += this.road.calculateScores()[1];
                             Utils.sleep(3000);
@@ -230,24 +262,32 @@ public class GameScene extends JPanel implements KeyListener, ActionListener {
                             } else
                                 reSetGame();
                         }
-                        if (this.road.getCount() != 0 && isRedFirstPlayer ||this.road.getCount() !=1 &&!isRedFirstPlayer){
-                            this.road.nextPlayer();
-                            disketteMovingToStartStatus();
-                            this.road.createArrow();
-                            System.out.println(this.road.getCount()+"  "+isRedFirstPlayer);
+                        if(this.road.fieldInRest()) {
+                            if (this.road.getCount() != 0 && isRedFirstPlayer || this.road.getCount() != 1 && !isRedFirstPlayer) {
+                                this.road.nextPlayer();
+                                disketteMovingToStartStatus();
+                                this.road.createArrow();
+                                System.out.println(this.road.getCount() + "  " + isRedFirstPlayer);
+                            }
                         }
-
-
                     }
                 }
                 this.repaint();
-
             }
         }).start();
+    }
+    public void checkButtonsVisibility(){
+        if(this.road.isRedNowPlaying()&&!this.iceCubeButton.isRedClicked())
+            iceCubeButton.getButton().setVisible(true);
+        else if(!this.road.isRedNowPlaying()&&!this.iceCubeButton.isBlueClicked())
+            iceCubeButton.getButton().setVisible(true);
+        else
+            iceCubeButton.getButton().setVisible(false);
     }
     public void reSetGame(){
         this.isRedFirstPlayer = !isRedFirstPlayer;
         this.road.reSetGame();
+        this.iceCubeButton.reset();
     }
     public void handleHomeCollisions(){
         for (int i = 0; i < NUMBER_OF_DISKETTES; i++) {
@@ -275,9 +315,10 @@ public class GameScene extends JPanel implements KeyListener, ActionListener {
 
     public void shootingStatus() {
         this.status = STATUS.shooting;
-        this.power.showPower();
+
         this.road.shoot(this.power.calculateSpeed(), 180 - this.road.getArrowAngel());
         this.status = STATUS.playing;
+        this.power = null;
     }
 
 
@@ -286,6 +327,7 @@ public class GameScene extends JPanel implements KeyListener, ActionListener {
             int sleep = this.road.timeToWaite();
             Utils.sleep(sleep);
             this.status = STATUS.choosePosition;
+            this.road.normalRoad();
         }).start();
         this.status = STATUS.disketteMovingToStart;
     }

@@ -2,24 +2,35 @@ import javax.swing.*;
 import java.awt.*;
 
 public class Road extends JPanel {
-    public static final double FRICTION_K = 4;
+    public static final double NORMAL_FRICTION_K = 4;
+    public static final double ICE_FRICTION_K = 0.5;
     public static final int NUMBER_OF_DISKETTES_PER_PLAYER = 4;
     public static final int SPACE_BETWEEN_DISKETTES = Diskette.SIZE * 27 / 20;
     public static final Point STARTING_POINT = new Point(Window.WINDOW_WIDTH / 2 - Diskette.SIZE / 2, Window.WINDOW_HEIGHT * 6 / 7);
     public static final int SCORE_AREA_SIZE = 100;
+    private double frictionK;
     private int count;
     private int[] xPoints;
     private int[] yPoints;
     private Diskette[] diskettes;
     private boolean isRedFirstPlayer;
     private Arrow arrow;
-    public boolean flag = false;
 
     public Diskette[] getDiskettes() {
         return this.diskettes;
     }
 
+    public void iceRoad() {
+        this.frictionK = ICE_FRICTION_K;
+    }
+
+    public void normalRoad() {
+        this.frictionK = NORMAL_FRICTION_K;
+        System.out.println("normal friction");
+    }
+
     public Road(int[] xPoints, int[] yPoints, boolean isRedFirstPlayer) {
+        normalRoad();
         this.isRedFirstPlayer = isRedFirstPlayer;
         this.xPoints = xPoints;
         this.yPoints = yPoints;
@@ -37,7 +48,8 @@ public class Road extends JPanel {
             this.diskettes[i].start();
         }
     }
-    public  void reSetGame(){
+
+    public void reSetGame() {
         this.isRedFirstPlayer = !this.isRedFirstPlayer;
         if (this.isRedFirstPlayer)
             this.count = 9;
@@ -73,7 +85,7 @@ public class Road extends JPanel {
     }
 
     public int timeToWaite() {
-        if(this.count>=0)
+        if (this.count >= 0)
             return (int) (diskettes[count].getEndTimeInSecond() * 1000);
         return 0;
     }
@@ -123,12 +135,31 @@ public class Road extends JPanel {
     public boolean endGame() {
         if (this.isRedFirstPlayer && this.count != 1 || !this.isRedFirstPlayer && this.count != 0)
             return false;
-        if(diskettes[count].isMoving())
+        return allDiskettesNotMoving();
+    }
+
+    public boolean allDiskettesNotMoving() {
+        if (diskettes[count].isMoving())
             return false;
-        System.out.println(this.count);
-        for (int i = 0; i < diskettes.length; i++)
-            if (diskettes[i].isMoving())
+        for (int i = 0; i < diskettes.length; i++) {
+            if (diskettes[i].isMoving()) {
+                System.out.println("the diskette that moves is:" + i);
                 return false;
+            }
+        }
+        return true;
+    }
+
+    public boolean fieldInRest() {
+        if (this.count > NUMBER_OF_DISKETTES_PER_PLAYER * 2 - 1)
+            return true;
+        if (diskettes[count].isMovingInGame())
+            return false;
+        for (int i = 0; i < diskettes.length; i++) {
+            if (diskettes[i].isMovingInGame()) {
+                return false;
+            }
+        }
         return true;
     }
 
@@ -159,7 +190,7 @@ public class Road extends JPanel {
     }
 
     public void shoot(double speed, double angelInDegrees) {
-        this.diskettes[count].inGameMoveSpeedAndAngle(speed, angelInDegrees, FRICTION_K);
+        this.diskettes[count].inGameMoveSpeedAndAngle(speed, angelInDegrees, frictionK);
     }
 
     public double getArrowAngel() {
@@ -182,21 +213,26 @@ public class Road extends JPanel {
         diskettes[d1].rest();
         diskettes[d2].rest();
         double distance = Math.sqrt(Math.pow(diskettes[d2].getXCenter() - diskettes[d1].getXCenter(), 2) + Math.pow(diskettes[d2].getYCenter() - diskettes[d1].getYCenter(), 2));
-        double overLapping = (diskettes[d1].getSize() / 2.0 + diskettes[d2].getSize() / 2.0 - distance)/2.0;
-        diskettes[d1].addX(overLapping/2*(diskettes[d1].getXCenter() - diskettes[d2].getXCenter())/distance);
-        diskettes[d1].addY(overLapping/2*(diskettes[d1].getYCenter() - diskettes[d2].getYCenter())/distance);
-        diskettes[d2].addX(overLapping/2*(diskettes[d2].getXCenter() - diskettes[d1].getXCenter())/distance);
-        diskettes[d2].addY(overLapping/2*(diskettes[d2].getYCenter() - diskettes[d1].getYCenter())/distance);
+        double overLapping = (diskettes[d1].getSize() / 2.0 + diskettes[d2].getSize() / 2.0 - distance) / 2.0;
+        diskettes[d1].addX(overLapping / 2 * (diskettes[d1].getXCenter() - diskettes[d2].getXCenter()) / distance);
+        diskettes[d1].addY(overLapping / 2 * (diskettes[d1].getYCenter() - diskettes[d2].getYCenter()) / distance);
+        diskettes[d2].addX(overLapping / 2 * (diskettes[d2].getXCenter() - diskettes[d1].getXCenter()) / distance);
+        diskettes[d2].addY(overLapping / 2 * (diskettes[d2].getYCenter() - diskettes[d1].getYCenter()) / distance);
 //        diskettes[d1].addX(diskettes[d1].getX()-diskettes[d2].getX());
 //        diskettes[d1].addY(diskettes[d1].getY()-diskettes[d2].getY());
 //        diskettes[d2].addX(diskettes[d2].getX()-diskettes[d1].getX());
 //        diskettes[d2].addY(diskettes[d2].getY()-diskettes[d1].getY());
     }
-    public boolean thereIsCollision(int d1, int d2){
-        return Diskette.checkCollisionBetweenCircles(this.diskettes[d1],this.diskettes[d2]);
+
+    public boolean thereIsCollision(int d1, int d2) {
+        return Diskette.checkCollisionBetweenCircles(this.diskettes[d1], this.diskettes[d2]);
+    }
+
+    public boolean isRedNowPlaying() {
+        return this.count % 2 == 1;
     }
 
     public void calculateCollision(int d1, int d2) {
-        Diskette.calculateCollision(this.diskettes[d1], this.diskettes[d2], FRICTION_K);
+        Diskette.calculateCollision(this.diskettes[d1], this.diskettes[d2], frictionK);
     }
 }
