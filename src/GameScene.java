@@ -50,15 +50,15 @@ public class GameScene extends JPanel implements KeyListener, ActionListener {
     public void resetHome(Color color) {
         this.redScore = 0;
         this.blueScore = 0;
+        this.diskettes = new Diskette[NUMBER_OF_DISKETTES];
         for (int i = 0; i < NUMBER_OF_DISKETTES; i++) {
             this.diskettes[i] = new Diskette(100 * i, 150 * i, color);
             this.diskettes[i].start();
             Utils.sleep(1);
         }
-        Utils.sleep(10000);
-        for (int i = 0; i < NUMBER_OF_DISKETTES; i++) {
-            this.diskettes[i] = new Diskette(100 * i, 150 * i, color);
-        }
+//        for (int i = 0; i < NUMBER_OF_DISKETTES; i++) {
+//            this.diskettes[i] = new Diskette(100 * i, 150 * i, color);
+//        }
         this.instructionsLabel.setVisible(false);
         this.blueScoreLabel.setVisible(false);
         this.redScoreLabel.setVisible(false);
@@ -111,7 +111,6 @@ public class GameScene extends JPanel implements KeyListener, ActionListener {
     }
 
     public void showRoad() {
-//        this.diskettes = null;
 
         this.button.setVisible(false);
         this.winnerPlayerLabel.setVisible(false);
@@ -124,6 +123,8 @@ public class GameScene extends JPanel implements KeyListener, ActionListener {
         this.redScoreLabel.setVisible(true);
         this.blueScoreLabel.setVisible(true);
         this.status = STATUS.playing;
+        Utils.sleep(10);
+        this.diskettes = null;
 
     }
 
@@ -254,7 +255,6 @@ public class GameScene extends JPanel implements KeyListener, ActionListener {
                 if (Utils.checkCollisionBetweenCircles(diskettes[i].getXCenter(), diskettes[i].getYCenter(), diskettes[i].getSize() / 2.0, diskettes[j].getXCenter() , diskettes[j].getYCenter() , +diskettes[j].getSize() / 2.0)) {
                     Diskette.StopCollision(diskettes[i], diskettes[j]);
                     Diskette.calculateCollision(diskettes[i], diskettes[j], FRICTION_K);
-
                 }
             }
         }
