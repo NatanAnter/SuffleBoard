@@ -148,7 +148,7 @@ public class Diskette extends Thread {
 
     public void restartTimer() {
         try {
-            //this.task.cancel();
+            this.task.cancel();
 
         }
         catch (Exception e)
