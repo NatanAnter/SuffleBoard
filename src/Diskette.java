@@ -4,6 +4,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class Diskette extends Thread {
+    public static final double EXPLODE_SPEED = Power.MAX_SPEED/3;
     public static final int SIZE = 50;
     public static final double SET_UP_SPEED_PX_PER_SECOND = 300;
     public static final Double SLEEP_IN_SECOND = 0.02;
@@ -22,14 +23,12 @@ public class Diskette extends Thread {
     private double speedPixelsPerSecond;
     private double angleInDegrees;
     private double distance;
-    //    private double time;
     private STATUS status;
     private double endTimeInSecond;
     private double acceleration;
     private boolean isTimeRunning;
-    //    private Timer timer;
     private long startTime;
-//    private TimerTask task;
+    private boolean isBomb;
 
     public STATUS getStatus() {
         return this.status;
@@ -67,12 +66,17 @@ public class Diskette extends Thread {
     public boolean isMoving() {
         return this.status == STATUS.movingInGame || this.status == STATUS.moveToStart || this.status == STATUS.setUp || this.status == STATUS.shoot || this.status == STATUS.restingOutOfFiled;
     }
+
     public boolean isMovingInGame() {
         return this.status == STATUS.movingInGame;
     }
 
     public Color getColor() {
         return color;
+    }
+
+    public double getMass() {
+        return mass;
     }
 
     public Diskette(int x, int y, Color color) {
@@ -89,9 +93,17 @@ public class Diskette extends Thread {
         this.color = color;
         this.mass = size * 2;
         this.acceleration = 0;
+        this.isBomb = false;
         this.status = STATUS.homePage;
         reSetTime();
 //        startTimer();
+    }
+
+    public void bomb() {
+        this.isBomb = true;
+    }
+    public void cancelBomb() {
+        this.isBomb = false;
     }
 
     public Diskette(Color color, int x, int y) {
@@ -103,8 +115,7 @@ public class Diskette extends Thread {
         this.x = x;
         this.y = y;
         this.color = color;
-
-
+        this.isBomb = false;
     }
 
     public void setXY(int x, int y) {
@@ -248,7 +259,7 @@ public class Diskette extends Thread {
 //                        this.task.cancel();
                         this.cancelTime();
                         this.status = STATUS.restingInGame;
-//                        this.time = this.endTimeInSecond;////////////////////////////////
+//                        this.time = this.endTimeInSecond;
                     }
                     checkIfOutOfFiledAndEliminate();
 
@@ -339,12 +350,19 @@ public class Diskette extends Thread {
         double xSpeed2 = Utils.calculateXSpeedAfterCollision(v2, m2, angle2, v1, m1, angle1, collisionAngleInDegrees);
         double ySpeed2 = Utils.calculateYSpeedAfterCollision(v2, m2, angle2, v1, m1, angle1, collisionAngleInDegrees);
 
+
         double speed1 = Math.sqrt(xSpeed1 * xSpeed1 + ySpeed1 * ySpeed1);
         double speed2 = Math.sqrt(xSpeed2 * xSpeed2 + ySpeed2 * ySpeed2);
         double newAngle1 = Utils.calculateDegrees(xSpeed1, ySpeed1);
         double newAngle2 = Utils.calculateDegrees(xSpeed2, ySpeed2);
+        if(d1.isBomb){
+            speed2+=EXPLODE_SPEED;
+        } else if (d2.isBomb) {
+            speed1+=EXPLODE_SPEED;
+        }
         d1.inGameMoveSpeedAndAngle(speed1, newAngle1, frictionK);
         d2.inGameMoveSpeedAndAngle(speed2, newAngle2, frictionK);
+        Utils.sleep(10);
     }
 
     public enum STATUS {

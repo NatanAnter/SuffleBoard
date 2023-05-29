@@ -7,7 +7,7 @@ public class IceCubeButton {
     public static final int SPACE = 10;
     public static final int X = GameScene.DEFAULT_X_POINTS[3] + SPACE;
     public static final int Y = GameScene.DEFAULT_Y_POINTS[0] - SPACE - HEIGHT;
-    public static final String NAME = "IceCubes.png";
+    public static final String NAME = "resources\\images\\IceCubes.png";
     private JButton button;
     private int x;
     private int y;

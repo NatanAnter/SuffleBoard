@@ -12,6 +12,9 @@ public class GameScene extends JPanel implements KeyListener, ActionListener {
     public static final int BUTTON_HEIGHT = 50;
     public static final double FRICTION_K = 0;
     public static final int NUMBER_OF_DISKETTES = 30;
+    private  Sound backgroundHome;
+    private  Sound backgroundGameFirst;
+    private  Sound freezeSpell;
     private int blueScore;
     private int redScore;
     private Diskette[] diskettes;
@@ -32,13 +35,12 @@ public class GameScene extends JPanel implements KeyListener, ActionListener {
     private JLabel winnerPlayerLabel;
     private JLabel redScoreLabel;
     private JLabel blueScoreLabel;
-    private  JLabel instructionsLabel;
+    private JLabel instructionsLabel;
     private boolean isRedFirstPlayer;
     private boolean isGameWithMagic;
-//    private JButton iceButton;
+    //    private JButton iceButton;
     private IceCubeButton iceCubeButton;
-    private JButton bombButton;
-
+    private BombButton bombButton;
 
 
     public void redPlayerWonStatus() {
@@ -66,7 +68,10 @@ public class GameScene extends JPanel implements KeyListener, ActionListener {
 //        for (int i = 0; i < NUMBER_OF_DISKETTES; i++) {
 //            this.diskettes[i] = new Diskette(100 * i, 150 * i, color);
 //        }
-        this.iceCubeButton.getButton().setVisible(true);
+        if (isGameWithMagic) {
+            this.iceCubeButton.getButton().setVisible(false);
+            this.bombButton.getButton().setVisible(false);
+        }
         this.instructionsLabel.setVisible(false);
         this.blueScoreLabel.setVisible(false);
         this.redScoreLabel.setVisible(false);
@@ -77,6 +82,10 @@ public class GameScene extends JPanel implements KeyListener, ActionListener {
 
 
     public GameScene() {
+        this.backgroundGameFirst = new Sound("resources\\sounds\\BackGroundGameFirst.wav");
+        this.backgroundHome = new Sound("resources\\sounds\\BackgroundHome.wav");
+        this.freezeSpell = new Sound("resources\\sounds\\FreezeSpell.wav");
+        this.backgroundHome.play();
         this.redScore = 0;
         this.blueScore = 0;
         this.isRedFirstPlayer = false;
@@ -97,14 +106,13 @@ public class GameScene extends JPanel implements KeyListener, ActionListener {
         this.add(playButton);
 
         this.playMagicButton = new JButton();
-        this.playMagicButton.setBounds(Window.WINDOW_WIDTH / 2 + BUTTON_WIDTH / 2+20, Window.WINDOW_HEIGHT / 2 - BUTTON_HEIGHT / 2, BUTTON_WIDTH*2,BUTTON_HEIGHT);
+        this.playMagicButton.setBounds(Window.WINDOW_WIDTH / 2 + BUTTON_WIDTH / 2 + 20, Window.WINDOW_HEIGHT / 2 - BUTTON_HEIGHT / 2, BUTTON_WIDTH * 2, BUTTON_HEIGHT);
         this.playMagicButton.addActionListener(this);
         this.playMagicButton.setText("play special");
         this.playMagicButton.setFont(new Font("Arial", Font.BOLD, 50));
         this.playMagicButton.setVisible(true);
         this.playMagicButton.setFocusable(false);
         this.add(playMagicButton);
-
 
 
         this.setFocusable(true);
@@ -115,8 +123,8 @@ public class GameScene extends JPanel implements KeyListener, ActionListener {
         this.setLayout(null);
 
         this.instructionsLabel = new JLabel();
-        this.instructionsLabel.setBounds(DEFAULT_X_POINTS[0],DEFAULT_Y_POINTS[1]-100,DEFAULT_X_POINTS[3]-DEFAULT_X_POINTS[0],80);
-        this.instructionsLabel.setFont(new Font("Arial",Font.PLAIN,20));
+        this.instructionsLabel.setBounds(DEFAULT_X_POINTS[0], DEFAULT_Y_POINTS[1] - 100, DEFAULT_X_POINTS[3] - DEFAULT_X_POINTS[0], 80);
+        this.instructionsLabel.setFont(new Font("Arial", Font.PLAIN, 20));
         this.add(this.instructionsLabel);
         this.redScoreLabel = new JLabel();
         this.redScoreLabel.setBounds(100, 70, 600, 60);
@@ -154,6 +162,12 @@ public class GameScene extends JPanel implements KeyListener, ActionListener {
             this.iceCubeButton.getButton().setFocusable(false);
             this.iceCubeButton.getButton().setVisible(true);
             this.add(iceCubeButton.getButton());
+
+            this.bombButton = new BombButton();
+            this.bombButton.getButton().addActionListener(this);
+            this.bombButton.getButton().setFocusable(false);
+            this.bombButton.getButton().setVisible(true);
+            this.add(bombButton.getButton());
         }
 
     }
@@ -179,14 +193,14 @@ public class GameScene extends JPanel implements KeyListener, ActionListener {
             }
             case choosePosition -> {
                 paintGame(graphics);
-                this.instructionsLabel.setText("<html>Press Right and Left arrows to move"+
-                        "<br>Press Up and Down arrows to change direction "+
+                this.instructionsLabel.setText("<html>Press Right and Left arrows to move" +
+                        "<br>Press Up and Down arrows to change direction " +
                         "<br>Press Enter or Space to choose speed.</html>");
                 this.road.showArrow(graphics);
             }
             case prepareToShoot -> {
                 paintGame(graphics);
-                this.instructionsLabel.setText("<html>Press Enter or Space to shoot"+
+                this.instructionsLabel.setText("<html>Press Enter or Space to shoot" +
                         "<br>Press BackSpace to return back.</html>");
 
                 this.road.showArrow(graphics);
@@ -198,25 +212,31 @@ public class GameScene extends JPanel implements KeyListener, ActionListener {
             }
 
         }
-//        label.setText(this.road.getInformation());
+//        lable.setText(this.road.getInformation());
+
     }
 
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == playButton) {
             showRoad();
             this.isGameWithMagic = false;
-        }
-        else if(e.getSource()==playMagicButton){
+        } else if (e.getSource() == playMagicButton) {
             this.isGameWithMagic = true;
             showRoad();
-        }
-        else if (e.getSource()==iceCubeButton.getButton()) {
-            if(this.road.isRedNowPlaying())
+        } else if (e.getSource() == iceCubeButton.getButton()) {
+            if (this.road.isRedNowPlaying())
                 this.iceCubeButton.redClicked();
             else
                 this.iceCubeButton.blueClicked();
             this.road.iceRoad();
             System.out.println("noFriction");
+        } else if (e.getSource() == bombButton.getButton()) {
+            if (this.road.isRedNowPlaying())
+                this.bombButton.redClicked();
+            else
+                this.bombButton.blueClicked();
+            this.road.bomb();
+            System.out.println("bomb");
         }
     }
 
@@ -227,11 +247,11 @@ public class GameScene extends JPanel implements KeyListener, ActionListener {
                     case homePage -> {
                         handleHomeCollisions();
                     }
-                    case disketteMovingToStart, prepareToShoot, shooting ->{
+                    case disketteMovingToStart, prepareToShoot, shooting -> {
                         handleCollisions();
                     }
                     case choosePosition -> {
-                        if(isGameWithMagic){
+                        if (isGameWithMagic) {
                             checkButtonsVisibility();
                         }
                         int dx = 0;
@@ -262,7 +282,7 @@ public class GameScene extends JPanel implements KeyListener, ActionListener {
                             } else
                                 reSetGame();
                         }
-                        if(this.road.fieldInRest()) {
+                        if (this.road.fieldInRest()) {
                             if (this.road.getCount() != 0 && isRedFirstPlayer || this.road.getCount() != 1 && !isRedFirstPlayer) {
                                 this.road.nextPlayer();
                                 disketteMovingToStartStatus();
@@ -276,34 +296,47 @@ public class GameScene extends JPanel implements KeyListener, ActionListener {
             }
         }).start();
     }
-    public void checkButtonsVisibility(){
-        if(this.road.isRedNowPlaying()&&!this.iceCubeButton.isRedClicked())
+
+    public void checkButtonsVisibility() {
+        if (this.road.isRedNowPlaying() && !this.iceCubeButton.isRedClicked())
             iceCubeButton.getButton().setVisible(true);
-        else if(!this.road.isRedNowPlaying()&&!this.iceCubeButton.isBlueClicked())
+        else if (!this.road.isRedNowPlaying() && !this.iceCubeButton.isBlueClicked())
             iceCubeButton.getButton().setVisible(true);
         else
             iceCubeButton.getButton().setVisible(false);
+        if (this.road.isRedNowPlaying() && !this.bombButton.isRedClicked())
+            iceCubeButton.getButton().setVisible(true);
+        else if (!this.road.isRedNowPlaying() && !this.bombButton.isBlueClicked())
+            bombButton.getButton().setVisible(true);
+        else
+            bombButton.getButton().setVisible(false);
     }
-    public void reSetGame(){
+
+    public void reSetGame() {
         this.isRedFirstPlayer = !isRedFirstPlayer;
         this.road.reSetGame();
-        this.iceCubeButton.reset();
+//        if(isGameWithMagic) {
+//            this.iceCubeButton.reset();
+//            this.bombButton.reset();
+//        }
     }
-    public void handleHomeCollisions(){
+
+    public void handleHomeCollisions() {
         for (int i = 0; i < NUMBER_OF_DISKETTES; i++) {
             for (int j = i + 1; j < NUMBER_OF_DISKETTES; j++) {
-                if (Utils.checkCollisionBetweenCircles(diskettes[i].getXCenter(), diskettes[i].getYCenter(), diskettes[i].getSize() / 2.0, diskettes[j].getXCenter() , diskettes[j].getYCenter() , +diskettes[j].getSize() / 2.0)) {
+                if (Utils.checkCollisionBetweenCircles(diskettes[i].getXCenter(), diskettes[i].getYCenter(), diskettes[i].getSize() / 2.0, diskettes[j].getXCenter(), diskettes[j].getYCenter(), +diskettes[j].getSize() / 2.0)) {
                     Diskette.StopCollision(diskettes[i], diskettes[j]);
                     Diskette.calculateCollision(diskettes[i], diskettes[j], FRICTION_K);
                 }
             }
         }
     }
-    public void handleCollisions(){
+
+    public void handleCollisions() {
         for (int i = 0; i < 2 * Road.NUMBER_OF_DISKETTES_PER_PLAYER; i++) {
-            if(this.road.getDiskettes()[i].isPlaying()) {
+            if (this.road.getDiskettes()[i].isPlaying()) {
                 for (int j = i + 1; j < 2 * Road.NUMBER_OF_DISKETTES_PER_PLAYER; j++) {
-                    if (this.road.getDiskettes()[j].isPlaying() && this.road.thereIsCollision(i,j)) {
+                    if (this.road.getDiskettes()[j].isPlaying() && this.road.thereIsCollision(i, j)) {
                         road.StopCollision(i, j);
                         road.calculateCollision(i, j);
                         System.out.printf("collision: %d, %d%n", i, j);
@@ -328,6 +361,7 @@ public class GameScene extends JPanel implements KeyListener, ActionListener {
             Utils.sleep(sleep);
             this.status = STATUS.choosePosition;
             this.road.normalRoad();
+            this.road.notBomb();
         }).start();
         this.status = STATUS.disketteMovingToStart;
     }

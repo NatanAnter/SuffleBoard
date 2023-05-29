@@ -173,19 +173,34 @@ public class Road extends JPanel {
         }
         return scores;
     }
+     public void bomb(){
+        this.diskettes[count].bomb();
+     }
+    public void notBomb(){
+        for (Diskette d:diskettes) {
+            d.cancelBomb();
+        }
+    }
 
     public String getInformation() {
         String str = "<html>";
-        for (int i = 0; i < 8; i++) {
-            str += "<br>" + i + ":   ";
-            str += " speed: " + Utils.calculateCurrentSpeed(this.diskettes[i].getSpeedPixelsPerSecond(), this.diskettes[i].getTime(), this.diskettes[i].getAcceleration());
-            str += "<br> angle: " + this.diskettes[i].getAngleInDegrees();
-            str += "<br> time: " + this.diskettes[i].getTime();
-            str += "<br> x: " + this.diskettes[i].getX();
-            str += "<br> y: " + this.diskettes[i].getY();
-            str += "<br> status: " + this.diskettes[i].getStatus();
-            str += "<br>";
+        try {
+            for (int i = 0; i < 8; i++) {
+                str+=diskettes[i].getMass() + ", ";
+//            str += "<br>" + i + ":   ";
+//            str += " speed: " + Utils.calculateCurrentSpeed(this.diskettes[i].getSpeedPixelsPerSecond(), this.diskettes[i].getTime(), this.diskettes[i].getAcceleration());
+//            str += "<br> angle: " + this.diskettes[i].getAngleInDegrees();
+//            str += "<br> time: " + this.diskettes[i].getTime();
+//            str += "<br> x: " + this.diskettes[i].getX();
+//            str += "<br> y: " + this.diskettes[i].getY();
+//            str += "<br> status: " + this.diskettes[i].getStatus();
+//            str += "<br>";
+            }
         }
+        catch (Exception e){
+
+        }
+
         return str + "</html>";
     }
 

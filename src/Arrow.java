@@ -39,7 +39,7 @@ public class Arrow {
         this.y += y;
     }
     public void paint(Graphics graphics) {
-        BufferedImage img = Utils.loadImage("Arrow.png");
+        BufferedImage img = Utils.loadImage("resources\\images\\Arrow.png");
         this.multiplier = this.radios / img.getHeight();
         AffineTransform at = AffineTransform.getTranslateInstance(x - img.getWidth() * 0.5 * multiplier, y - img.getHeight() * multiplier);
         at.rotate(Math.toRadians(this.degrees), img.getWidth() * 0.5 * multiplier, img.getHeight() * multiplier);
