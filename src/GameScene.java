@@ -141,6 +141,11 @@ public class GameScene extends JPanel implements KeyListener, ActionListener {
     }
 
     public void showRoad() {
+        this.backgroundHome.stop();
+        if(this.redScore+this.blueScore==0){
+            this.backgroundGameFirst.play();
+
+        }
         this.playMagicButton.setVisible(false);
         this.playButton.setVisible(false);
         this.winnerPlayerLabel.setVisible(false);
@@ -218,8 +223,8 @@ public class GameScene extends JPanel implements KeyListener, ActionListener {
 
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == playButton) {
-            showRoad();
             this.isGameWithMagic = false;
+            showRoad();
         } else if (e.getSource() == playMagicButton) {
             this.isGameWithMagic = true;
             showRoad();

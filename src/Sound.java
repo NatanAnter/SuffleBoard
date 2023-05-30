@@ -20,6 +20,7 @@ public class Sound {
             audioInputStream = AudioSystem.getAudioInputStream(file);
             clip = AudioSystem.getClip();
             clip.open(audioInputStream);
+            clip.setLoopPoints(0,clip.getFrameLength());  
         } catch (Exception e) {
         }
     }
