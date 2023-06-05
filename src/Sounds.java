@@ -29,6 +29,7 @@ public class Sounds {
         this.paused = false;
         this.musicVolume = musicVolume;
         this.soundVolume = soundVolume;
+
     }
 
     public List<List<Sound>> loadSounds(File folder, String[] foldersNames) {
@@ -62,6 +63,7 @@ public class Sounds {
     public void playMusic(int musicState) {
         this.currentPlay = musicState;
         MUSIC_NUMBER.set(this.currentPlay, (MUSIC_NUMBER.get(this.currentPlay) + 1) % MUSIC.get(this.currentPlay).size());
+        System.out.println(MUSIC_NUMBER.get(currentPlay));
         this.MUSIC.get(this.currentPlay).get(MUSIC_NUMBER.get(this.currentPlay)).setVolume(musicVolume);
         this.MUSIC.get(this.currentPlay).get(MUSIC_NUMBER.get(this.currentPlay)).play();
         this.paused = false;
@@ -69,7 +71,14 @@ public class Sounds {
 
     public void resetAndStopMusic() {
         this.MUSIC.get(this.currentPlay).get(MUSIC_NUMBER.get(this.currentPlay)).resetAndStop();
-
+        resetAndStopAll();
+    }
+    public  void resetAndStopAll(){
+        for (List<Sound> list:MUSIC) {
+            for(Sound sound:list){
+                sound.resetAndStop();
+            }
+        }
     }
 
     public void playPauseMusic() {
@@ -91,8 +100,10 @@ public class Sounds {
     }
 
     public void playNextMusic() {
+        this.paused = true;
         resetAndStopMusic();
         playMusic(this.currentPlay);
+        System.out.println("play");
     }
 
     public void setMusicVolume(float volume) {
@@ -104,8 +115,9 @@ public class Sounds {
     }
 
     public void playNextIfNeeded() {
-        if (!paused && !MUSIC.get(this.currentPlay).get(MUSIC_NUMBER.get(currentPlay)).isActive())
+        if (!paused && !MUSIC.get(this.currentPlay).get(MUSIC_NUMBER.get(currentPlay)).isActive()) {
             playNextMusic();
+        }
     }
 
     public void playHomeBackgroundMusic() {
@@ -139,7 +151,6 @@ public class Sounds {
     }
 
     public void playSoundMagic(int soundState) {
-        System.out.println(SOUND_EFFECTS_MAGIC_NUMBER.get(soundState));
         SOUND_EFFECTS_MAGIC_NUMBER.set(soundState, (SOUND_EFFECTS_MAGIC_NUMBER.get(soundState) + 1) % SOUND_EFFECTS_MAGIC.get(soundState).size());
         this.SOUND_EFFECTS_MAGIC.get(soundState).get(SOUND_EFFECTS_MAGIC_NUMBER.get(soundState)).setVolume(soundVolume);
         this.SOUND_EFFECTS_MAGIC.get(soundState).get(SOUND_EFFECTS_MAGIC_NUMBER.get(soundState)).rePlay();

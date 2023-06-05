@@ -25,6 +25,7 @@ public class Sound {
             System.out.println("Error: " + e);
             this.exist = false;
         }
+
     }
 
     public void setVolume(float volume) {
