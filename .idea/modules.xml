@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/SuffleBoard.iml" filepath="$PROJECT_DIR$/SuffleBoard.iml" />
+      <module fileurl="file://$PROJECT_DIR$/ShuffleBoard.iml" filepath="$PROJECT_DIR$/ShuffleBoard.iml" />
     </modules>
   </component>
 </project>

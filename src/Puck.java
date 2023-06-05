@@ -1,18 +1,22 @@
 import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
 import java.util.Random;
-import java.util.Timer;
-import java.util.TimerTask;
 
-public class Diskette extends Thread {
-    public static final double EXPLODE_SPEED = Power.MAX_SPEED/3;
+public class Puck extends Thread {
+    public static final String PUCK_RED_NAME = "puckRed.png";
+    public static final String PUCK_BLUE_NAME = "puckBlue.png";
+    public static final String PUCK_DEFAULT_NAME = "puckDefault.png";
+    public static final double EXPLODE_SPEED = Power.MAX_SPEED;
     public static final int SIZE = 50;
     public static final double SET_UP_SPEED_PX_PER_SECOND = 300;
     public static final Double SLEEP_IN_SECOND = 0.02;
     public static final int SLEEP_IN_MILLI_SECOND = (int) (SLEEP_IN_SECOND * 1000);
     private static final double MASS = 0.5;
     public static final double G = 9.8;
+    private final String name;
     private int size;
-    private double mass;
+    private final double mass;
     private Color color;
     private double x;
     private double y;
@@ -29,6 +33,9 @@ public class Diskette extends Thread {
     private boolean isTimeRunning;
     private long startTime;
     private boolean isBomb;
+    private boolean needToPlayFallingSound;
+    private BufferedImage img;
+    private double degrees;
 
     public STATUS getStatus() {
         return this.status;
@@ -38,22 +45,10 @@ public class Diskette extends Thread {
         return size;
     }
 
-    public double getAngleInDegrees() {
-        return angleInDegrees;
-    }
-
     public double getAcceleration() {
         return acceleration;
     }
 
-    public double getSpeedPixelsPerSecond() {
-        return speedPixelsPerSecond;
-    }
-
-    public double getTime() {
-//        return time;
-        return getTimeInSeconds();
-    }
 
     public double getEndTimeInSecond() {
         return endTimeInSecond;
@@ -75,13 +70,10 @@ public class Diskette extends Thread {
         return color;
     }
 
-    public double getMass() {
-        return mass;
-    }
 
-    public Diskette(int x, int y, Color color) {
+    public Puck(int x, int y, Color color) {
         Random random = new Random();
-//        this.timer = new Timer();
+        this.needToPlayFallingSound = false;
         this.isTimeRunning = true;
         this.size = random.nextInt(10, 80);
         this.speedPixelsPerSecond = random.nextDouble(50, 400);
@@ -91,24 +83,49 @@ public class Diskette extends Thread {
         this.xStartingPosition = x;
         this.yStartingPosition = y;
         this.color = color;
+        if (color == Color.GREEN) {
+            int colorNumber = random.nextInt(3);
+            if (colorNumber == 0)
+                this.color = color;
+            else if (colorNumber == 1) {
+                this.color = Color.RED;
+            } else {
+                this.color = Color.BLUE;
+            }
+        }
         this.mass = size * 2;
         this.acceleration = 0;
         this.isBomb = false;
         this.status = STATUS.homePage;
+        this.name = getFileName();
+        init();
         reSetTime();
-//        startTimer();
     }
 
     public void bomb() {
         this.isBomb = true;
     }
+
+    public boolean isBomb() {
+        return isBomb;
+    }
+
     public void cancelBomb() {
         this.isBomb = false;
     }
 
-    public Diskette(Color color, int x, int y) {
+    public String getFileName() {
+        if (this.color == Color.RED)
+            return PUCK_RED_NAME;
+        if (this.color == Color.BLUE)
+            return PUCK_BLUE_NAME;
+
+        return PUCK_DEFAULT_NAME;
+
+    }
+
+    public Puck(Color color, int x, int y) {
         this.isTimeRunning = true;
-//        this.timer = new Timer();
         this.size = SIZE;
         this.mass = MASS;
         this.status = STATUS.setUp;
@@ -116,6 +133,8 @@ public class Diskette extends Thread {
         this.y = y;
         this.color = color;
         this.isBomb = false;
+        this.name = getFileName();
+        init();
     }
 
     public void setXY(int x, int y) {
@@ -164,32 +183,8 @@ public class Diskette extends Thread {
         this.startTime = System.currentTimeMillis();
         this.isTimeRunning = true;
     }
-//    public void startTimer() {
-//        try {
-//            this.task = new TimerTask() {
-//                @Override
-//                public void run() {
-//                    time += SLEEP_IN_SECOND;
-//                }
-//            };
-//            this.time = 0;
-//            this.timer.scheduleAtFixedRate(this.task, 0, (int) (SLEEP_IN_SECOND * 1000));
-//        } catch (Exception e) {
-//            System.out.println("Error: " + e);
-//        }
-//    }
-
-//    public void restartTimer() {
-//        try {
-//            this.task.cancel();
-//
-//        } catch (Exception e) {
-//        }
-//        startTimer();
-//    }
 
     public void toStartMove(int xTarget, int yTarget) {
-//        startTimer();
         reSetTime();
         this.xStartingPosition = this.x;
         this.yStartingPosition = this.y;
@@ -202,7 +197,6 @@ public class Diskette extends Thread {
 
     public void inGameMoveSpeedAndAngle(double speed, double angle, double frictionK) {
         reSetTime();
-//        restartTimer();
         this.acceleration = calculateAcceleration(frictionK);
         this.speedPixelsPerSecond = speed;
         this.angleInDegrees = angle;
@@ -213,10 +207,8 @@ public class Diskette extends Thread {
             this.status = STATUS.movingInGame;
     }
 
-    public static void StopCollision(Diskette d1, Diskette d2) {
-//        d1.rest();
-//        d2.rest();
-        double distance = Math.sqrt(Math.pow(d2.getXCenter() - d1.getXCenter(), 2) + Math.pow(d2.getYCenter() - d2.getYCenter(), 2));
+    public static void StopCollision(Puck d1, Puck d2) {
+        double distance = Math.sqrt(Math.pow(d2.getXCenter() - d1.getXCenter(), 2) + Math.pow(d2.getYCenter() - d1.getYCenter(), 2));
         double overLapping = (d1.getSize() / 2.0 + d2.getSize() / 2.0 - distance) / 2.0;
         d1.addX(overLapping / 2 * (d1.getXCenter() - d2.getXCenter()) / distance);
         d1.addY(overLapping / 2 * (d1.getYCenter() - d2.getYCenter()) / distance);
@@ -229,60 +221,44 @@ public class Diskette extends Thread {
     }
 
     public void run() {
+
         while (true) {
             switch (this.status) {
                 case moveToStart -> {
                     if (this.getTimeInSeconds() < this.endTimeInSecond) {
-//                    if (this.time < this.endTimeInSecond) {
-//                        this.x = Utils.calculatePosition(xStartingPosition, (xTarget - xStartingPosition) / (this.distance) * SET_UP_SPEED_PX_PER_SECOND, this.time, 0);
-//                        this.y = Utils.calculatePosition(yStartingPosition, (yTarget - yStartingPosition) / (this.distance) * SET_UP_SPEED_PX_PER_SECOND, this.time, 0);
                         this.x = Utils.calculatePosition(xStartingPosition, (xTarget - xStartingPosition) / (this.distance) * SET_UP_SPEED_PX_PER_SECOND, this.getTimeInSeconds(), 0);
                         this.y = Utils.calculatePosition(yStartingPosition, (yTarget - yStartingPosition) / (this.distance) * SET_UP_SPEED_PX_PER_SECOND, this.getTimeInSeconds(), 0);
                     } else {
                         this.x = xTarget;
                         this.y = yTarget;
-//                        this.task.cancel();
                         this.cancelTime();
                         this.status = STATUS.shoot;
-//                        this.time = this.endTimeInSecond;/////////////////////////////////
                     }
                 }
                 case movingInGame -> {
-
+                    this.degrees += 1;
                     if (this.getTimeInSeconds() < this.endTimeInSecond) {
-//                    if (this.time < this.endTimeInSecond) {
-                        this.x = Utils.calculatePosition(this.xStartingPosition, this.speedPixelsPerSecond * Math.sin(Math.toRadians(this.angleInDegrees)), this.getTimeInSeconds(), -1 * this.acceleration * Math.sin(Math.toRadians(this.angleInDegrees)));
-                        this.y = Utils.calculatePosition(this.yStartingPosition, this.speedPixelsPerSecond * Math.cos(Math.toRadians(this.angleInDegrees)), this.getTimeInSeconds(), -1 * this.acceleration * Math.cos(Math.toRadians(this.angleInDegrees)));
-//                        this.x = Utils.calculatePosition(this.xStartingPosition, this.speedPixelsPerSecond * Math.sin(Math.toRadians(this.angleInDegrees)), this.time, -1 * this.acceleration * Math.sin(Math.toRadians(this.angleInDegrees)));
-//                        this.y = Utils.calculatePosition(this.yStartingPosition, this.speedPixelsPerSecond * Math.cos(Math.toRadians(this.angleInDegrees)), this.time, -1 * this.acceleration * Math.cos(Math.toRadians(this.angleInDegrees)));
+                        calculateXY();
                     } else {
-//                        this.task.cancel();
                         this.cancelTime();
                         this.status = STATUS.restingInGame;
-//                        this.time = this.endTimeInSecond;
                     }
                     checkIfOutOfFiledAndEliminate();
-
                 }
                 case restingOutOfFiled -> {
                     this.xStartingPosition += 0.5;
                     this.yStartingPosition += 0.5;
-//                    this.x = Utils.calculatePosition(this.xStartingPosition, this.speedPixelsPerSecond * Math.sin(Math.toRadians(this.angleInDegrees)), this.time, -1 * this.acceleration * Math.sin(Math.toRadians(this.angleInDegrees)));
-//                    this.y = Utils.calculatePosition(this.yStartingPosition, this.speedPixelsPerSecond * Math.cos(Math.toRadians(this.angleInDegrees)), this.time, -1 * this.acceleration * Math.cos(Math.toRadians(this.angleInDegrees)));
-                    this.x = Utils.calculatePosition(this.xStartingPosition, this.speedPixelsPerSecond * Math.sin(Math.toRadians(this.angleInDegrees)), this.getTimeInSeconds(), -1 * this.acceleration * Math.sin(Math.toRadians(this.angleInDegrees)));
-                    this.y = Utils.calculatePosition(this.yStartingPosition, this.speedPixelsPerSecond * Math.cos(Math.toRadians(this.angleInDegrees)), this.getTimeInSeconds(), -1 * this.acceleration * Math.cos(Math.toRadians(this.angleInDegrees)));
+                    this.speedPixelsPerSecond *= 0.98;
+                    this.x = Utils.calculatePosition(this.xStartingPosition, this.speedPixelsPerSecond * Math.sin(Math.toRadians(this.angleInDegrees)), this.getTimeInSeconds(), 0);
+                    this.y = Utils.calculatePosition(this.yStartingPosition, this.speedPixelsPerSecond * Math.cos(Math.toRadians(this.angleInDegrees)), this.getTimeInSeconds(), 0);
                     this.size--;
                     Utils.sleep(20);
                     if (this.size == 0) {
                         this.status = STATUS.eliminated;
-//                        this.task.cancel();
                     }
                 }
                 case homePage -> {
-//                    this.x = Utils.calculatePosition(this.xStartingPosition, this.speedPixelsPerSecond * Math.sin(Math.toRadians(this.angleInDegrees)), this.time, -1 * this.acceleration * Math.sin(Math.toRadians(this.angleInDegrees)));
-//                    this.y = Utils.calculatePosition(this.yStartingPosition, this.speedPixelsPerSecond * Math.cos(Math.toRadians(this.angleInDegrees)), this.time, -1 * this.acceleration * Math.cos(Math.toRadians(this.angleInDegrees)));
-                    this.x = Utils.calculatePosition(this.xStartingPosition, this.speedPixelsPerSecond * Math.sin(Math.toRadians(this.angleInDegrees)), this.getTimeInSeconds(), -1 * this.acceleration * Math.sin(Math.toRadians(this.angleInDegrees)));
-                    this.y = Utils.calculatePosition(this.yStartingPosition, this.speedPixelsPerSecond * Math.cos(Math.toRadians(this.angleInDegrees)), this.getTimeInSeconds(), -1 * this.acceleration * Math.cos(Math.toRadians(this.angleInDegrees)));
+                    calculateXY();
 
                     if (this.x > Window.WINDOW_WIDTH) {
                         x = -size;
@@ -303,7 +279,14 @@ public class Diskette extends Thread {
                 }
             }
             Utils.sleep(SLEEP_IN_MILLI_SECOND);
+
         }
+
+    }
+
+    private void calculateXY() {
+        this.x = Utils.calculatePosition(this.xStartingPosition, this.speedPixelsPerSecond * Math.sin(Math.toRadians(this.angleInDegrees)), this.getTimeInSeconds(), -1 * this.acceleration * Math.sin(Math.toRadians(this.angleInDegrees)));
+        this.y = Utils.calculatePosition(this.yStartingPosition, this.speedPixelsPerSecond * Math.cos(Math.toRadians(this.angleInDegrees)), this.getTimeInSeconds(), -1 * this.acceleration * Math.cos(Math.toRadians(this.angleInDegrees)));
     }
 
     public void cancelTime() {
@@ -311,20 +294,39 @@ public class Diskette extends Thread {
     }
 
     public void checkIfOutOfFiledAndEliminate() {
-        if (this.x + this.size < GameScene.DEFAULT_X_POINTS[0] || this.x > GameScene.DEFAULT_X_POINTS[3] || this.y + this.size < GameScene.DEFAULT_Y_POINTS[1])
+        if (this.x + this.size < GameScene.DEFAULT_X_POINTS[0] || this.x > GameScene.DEFAULT_X_POINTS[3] || this.y + this.size < GameScene.DEFAULT_Y_POINTS[1]) {
             this.status = STATUS.restingOutOfFiled;
+            this.reSetTime();
+            this.xStartingPosition = this.x;
+            this.yStartingPosition = this.y;
+            this.needToPlayFallingSound = true;
+        }
+    }
+
+    public boolean isNeedToPlayFallingSound() {
+        return this.needToPlayFallingSound;
+    }
+
+    public void noNeedToPlayFallingSound() {
+        needToPlayFallingSound = false;
+    }
+
+    public void init() {
+        this.img = Utils.loadImage(name);
+        this.degrees = 0;
     }
 
     public void paint(Graphics graphics) {
-        graphics.setColor(this.color);
-        graphics.fillOval((int) x, (int) y, size, size);
+        
+        AffineTransform at = AffineTransform.getTranslateInstance(x /*- img.getWidth() * 0.5 * multiplier*/, y /*- img.getHeight() * multiplier*/);
+        double multiplier = (double) this.size / img.getHeight();
+        at.rotate(Math.toRadians(this.degrees), img.getWidth() * 0.5 * multiplier, img.getHeight() * 0.5 * multiplier);
+        at.scale(multiplier, multiplier);
+        Graphics2D graphics2D = (Graphics2D) graphics;
+        graphics2D.drawImage(img, at, null);
     }
 
-    //    public static Boolean checkCollisionBetweenCircles(double x1, double y1, double r1, double x2, double y2, double r2) {
-//        double DoubledDistance = Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2);
-//        return DoubledDistance <= Math.pow(r1 + r2, 2);
-//    }
-    public static Boolean checkCollisionBetweenCircles(Diskette d1, Diskette d2) {
+    public static Boolean checkCollisionBetweenCircles(Puck d1, Puck d2) {
         double x1 = d1.getXCenter();
         double y1 = d1.getYCenter();
         double r1 = d1.size / 2.0;
@@ -334,7 +336,7 @@ public class Diskette extends Thread {
         return Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2) <= Math.pow(r1 + r2, 2);
     }
 
-    public static void calculateCollision(Diskette d1, Diskette d2, double frictionK) {
+    public static void calculateCollision(Puck d1, Puck d2, double frictionK) {
         double collisionAngleInDegrees = 270 - Utils.calculateCollisionDegrees(d1.getXCenter(), d1.getYCenter(), d2.getXCenter(), d2.getYCenter());
         double v1 = Utils.calculateCurrentSpeed(d1.speedPixelsPerSecond, d1.getTimeInSeconds(), d1.getAcceleration());
 //        double v1 = Utils.calculateCurrentSpeed(d1.speedPixelsPerSecond, d1.time, d1.getAcceleration());
@@ -355,10 +357,10 @@ public class Diskette extends Thread {
         double speed2 = Math.sqrt(xSpeed2 * xSpeed2 + ySpeed2 * ySpeed2);
         double newAngle1 = Utils.calculateDegrees(xSpeed1, ySpeed1);
         double newAngle2 = Utils.calculateDegrees(xSpeed2, ySpeed2);
-        if(d1.isBomb){
-            speed2+=EXPLODE_SPEED;
+        if (d1.isBomb) {
+            speed2 += EXPLODE_SPEED;
         } else if (d2.isBomb) {
-            speed1+=EXPLODE_SPEED;
+            speed1 += EXPLODE_SPEED;
         }
         d1.inGameMoveSpeedAndAngle(speed1, newAngle1, frictionK);
         d2.inGameMoveSpeedAndAngle(speed2, newAngle2, frictionK);

@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class Utils {
+    public static final String IMAGES_LOCATIONS = "resources\\images\\";
     public static void sleep(int milliSecond) {
         try {
             Thread.sleep(milliSecond);
@@ -15,14 +16,13 @@ public class Utils {
     }
     public static ImageIcon loadButtonImage(String fileName, int width, int height){
         BufferedImage img = loadImage(fileName);
-        Image dimg = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
-        ImageIcon imageIcon = new ImageIcon(dimg);
-        return imageIcon;
+        Image imgIco = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        return new ImageIcon(imgIco);
     }
     public static BufferedImage loadImage(String fileName) {
         BufferedImage img = null;
         try {
-            img = ImageIO.read(new File(fileName));
+            img = ImageIO.read(new File(IMAGES_LOCATIONS+fileName));
         } catch (IOException ignored) {
             System.out.println("didnt find image");
         }
@@ -30,12 +30,7 @@ public class Utils {
     }
 
     public static double calculatePosition(double startingPosition, double startingSpeed, double time, double acceleration) {
-        int direction;
-        if (startingSpeed > 0)
-            direction = 1;
-        else
-            direction = 1;
-        return startingPosition + startingSpeed * time + 0.5 * acceleration * direction * time * time;
+        return startingPosition + startingSpeed * time + 0.5 * acceleration  * time * time;
     }
 
     public static double calculateCurrentSpeed(double startingSpeed, double time, double acceleration) {
@@ -69,25 +64,20 @@ public class Utils {
     public static double calculateCollisionDegrees(double x1, double y1, double x2, double y2) {
         double dx = x2 - x1;
         double dy = y2 - y1;
-        //return Math.toDegrees(Math.atan2(y,x));
-        double degrees;
-        if (dx == 0)
-            degrees = 90;
-        else if (dx > 0)
-            degrees = Math.toDegrees(Math.atan(dy / dx));
-        else
-            degrees = Math.toDegrees(Math.atan(dy / dx)) + 180;
-        return degrees;
+        return calculateDegrees(dx,dy);
     }
 
     public static double calculateDegrees(double dx, double dy) {
         double degrees;
         if (dx == 0)
             degrees = 90;
-        else if (dx > 0)
-            degrees = Math.toDegrees(Math.atan(dy / dx));
-        else
-            degrees = Math.toDegrees(Math.atan(dy / dx)) + 180;
+        else {
+            double degrees1 = Math.toDegrees(Math.atan(dy / dx));
+            if (dx > 0)
+                degrees = degrees1;
+            else
+                degrees = degrees1 + 180;
+        }
         return degrees;
     }
 

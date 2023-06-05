@@ -10,8 +10,6 @@ public class Window extends JFrame {
         this.setLocationRelativeTo(null);
         GameScene gameScene = new GameScene();
         this.add(gameScene);
-//        this.homePage = new HomePage();
-//        this.add(homePage);
     }
 
     public void showWindow() {

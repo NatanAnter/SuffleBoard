@@ -1,25 +1,21 @@
-import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 
 public class Arrow {
-    public static final int STARTING_X = 0;
-    public static final int STARTING_Y = 0;
     private int x;
     private int y;
-    private double radios;
+    private final double radios;
     private double degrees;
-    private int i = 0;
     private double multiplier;
+    private BufferedImage img;
 
     public Arrow(int x, int y, double radios) {
         this.x = x;
         this.y = y;
         this.radios = radios;
         this.degrees = 0;
+        init();
     }
 
     public double getDegrees() {
@@ -38,9 +34,11 @@ public class Arrow {
         this.x += x;
         this.y += y;
     }
-    public void paint(Graphics graphics) {
-        BufferedImage img = Utils.loadImage("resources\\images\\Arrow.png");
+    public void init(){
+        this.img = Utils.loadImage("Arrow.png");
         this.multiplier = this.radios / img.getHeight();
+    }
+    public void paint(Graphics graphics) {
         AffineTransform at = AffineTransform.getTranslateInstance(x - img.getWidth() * 0.5 * multiplier, y - img.getHeight() * multiplier);
         at.rotate(Math.toRadians(this.degrees), img.getWidth() * 0.5 * multiplier, img.getHeight() * multiplier);
         at.scale(multiplier, multiplier);

@@ -10,7 +10,7 @@ public class Power extends Thread {
     public static final Color BORDER_COLOR = Color.WHITE;
     public static final Color INTERIOR_COLOR = Color.MAGENTA;
     public static final double MAX_SPEED = 400;/////////////////////////////////////////////////////////////////////////600
-    public static final double MIN_SPEED = 0;
+    public static final double MIN_SPEED = 50;
     private int height;
     private boolean inMove;
 
@@ -44,9 +44,6 @@ public class Power extends Thread {
                 Utils.sleep(4);
             }
         }
-    }
-    public void showPower(){
-        this.inMove = false;
     }
 
 }
