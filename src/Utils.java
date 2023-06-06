@@ -7,30 +7,33 @@ import java.io.IOException;
 
 public class Utils {
     public static final String IMAGES_LOCATIONS = "resources\\images\\";
+
     public static void sleep(int milliSecond) {
         try {
             Thread.sleep(milliSecond);
         } catch (InterruptedException e) {
-            throw new RuntimeException(e);
+            JOptionPane.showConfirmDialog(null, e, "sleep", JOptionPane.YES_NO_OPTION);
         }
     }
-    public static ImageIcon loadButtonImage(String fileName, int width, int height){
+
+    public static ImageIcon loadButtonImage(String fileName, int width, int height) {
         BufferedImage img = loadImage(fileName);
         Image imgIco = img.getScaledInstance(width, height, Image.SCALE_SMOOTH);
         return new ImageIcon(imgIco);
     }
+
     public static BufferedImage loadImage(String fileName) {
         BufferedImage img = null;
         try {
-            img = ImageIO.read(new File(IMAGES_LOCATIONS+fileName));
-        } catch (IOException ignored) {
-            System.out.println("didnt find image");
+            img = ImageIO.read(new File(IMAGES_LOCATIONS + fileName));
+        } catch (IOException e) {
+            JOptionPane.showConfirmDialog(null, IMAGES_LOCATIONS + fileName + "  " + e, "didnt find image", JOptionPane.YES_NO_OPTION);
         }
         return img;
     }
 
     public static double calculatePosition(double startingPosition, double startingSpeed, double time, double acceleration) {
-        return startingPosition + startingSpeed * time + 0.5 * acceleration  * time * time;
+        return startingPosition + startingSpeed * time + 0.5 * acceleration * time * time;
     }
 
     public static double calculateCurrentSpeed(double startingSpeed, double time, double acceleration) {
@@ -64,7 +67,7 @@ public class Utils {
     public static double calculateCollisionDegrees(double x1, double y1, double x2, double y2) {
         double dx = x2 - x1;
         double dy = y2 - y1;
-        return calculateDegrees(dx,dy);
+        return calculateDegrees(dx, dy);
     }
 
     public static double calculateDegrees(double dx, double dy) {

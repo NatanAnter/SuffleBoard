@@ -7,7 +7,7 @@ public class Board extends JPanel {
     public static final String BOARD_NAME = "board.png";
     public static final String BOARD_MAGIC_NAME = "boardMagic1.png";
     public static final String BOARD_FROZEN_NAME = "boardFrozen.png";
-    public static final double NORMAL_FRICTION_K = 4;
+    public static final double NORMAL_FRICTION_K = 10;
     public static final double ICE_FRICTION_K = 0.5;
     public static final int NUMBER_OF_PUCKS_PER_PLAYER = 4;
     public static final int SPACE_BETWEEN_PUCKS = Puck.SIZE * 27 / 20;
@@ -155,7 +155,7 @@ public class Board extends JPanel {
         if (this.count >= 0 && this.count <= NUMBER_OF_PUCKS_PER_PLAYER * 2 - 1)
             this.pucks[count].toStartMove(STARTING_POINT.x(), STARTING_POINT.y());
         else
-            System.out.println("count out of bounds");
+            JOptionPane.showConfirmDialog(null, "do you like the game?", "index out of bounds", JOptionPane.YES_NO_OPTION);
     }
 
     public boolean endGame() {

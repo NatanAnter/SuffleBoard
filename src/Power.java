@@ -9,8 +9,8 @@ public class Power extends Thread {
     public static final int Y = Window.WINDOW_HEIGHT - HEIGHT - 50;
     public static final Color BORDER_COLOR = Color.WHITE;
     public static final Color INTERIOR_COLOR = Color.MAGENTA;
-    public static final double MAX_SPEED = 400;/////////////////////////////////////////////////////////////////////////600
-    public static final double MIN_SPEED = 50;
+    public static final double MAX_SPEED = 600;
+    public static final double MIN_SPEED = 100;
     private int height;
     private boolean inMove;
 
@@ -26,7 +26,7 @@ public class Power extends Thread {
 
 
     public double calculateSpeed() {
-        return this.height / (HEIGHT - SPACING * 2.0) * (MAX_SPEED - MIN_SPEED);
+        return this.height / (HEIGHT - SPACING * 2.0) * (MAX_SPEED - MIN_SPEED) + MIN_SPEED;
     }
 
     public void run() {

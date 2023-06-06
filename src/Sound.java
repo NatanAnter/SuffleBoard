@@ -2,6 +2,7 @@ import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.FloatControl;
+import javax.swing.*;
 import java.io.File;
 
 public class Sound {
@@ -22,7 +23,7 @@ public class Sound {
             clip = AudioSystem.getClip();
             clip.open(audioInputStream);
         } catch (Exception e) {
-            System.out.println("Error: " + e);
+            JOptionPane.showConfirmDialog(null, e, "sound not found", JOptionPane.YES_NO_OPTION);
             this.exist = false;
         }
 
@@ -34,7 +35,7 @@ public class Sound {
                 FloatControl volumeControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
                 volumeControl.setValue(volume);
             } catch (IllegalArgumentException e) {
-                System.out.println("Error: " + e);
+                JOptionPane.showConfirmDialog(null, e, "volume problems", JOptionPane.YES_NO_OPTION);
             }
         }
     }

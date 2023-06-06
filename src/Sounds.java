@@ -63,7 +63,6 @@ public class Sounds {
     public void playMusic(int musicState) {
         this.currentPlay = musicState;
         MUSIC_NUMBER.set(this.currentPlay, (MUSIC_NUMBER.get(this.currentPlay) + 1) % MUSIC.get(this.currentPlay).size());
-        System.out.println(MUSIC_NUMBER.get(currentPlay));
         this.MUSIC.get(this.currentPlay).get(MUSIC_NUMBER.get(this.currentPlay)).setVolume(musicVolume);
         this.MUSIC.get(this.currentPlay).get(MUSIC_NUMBER.get(this.currentPlay)).play();
         this.paused = false;
@@ -103,7 +102,6 @@ public class Sounds {
         this.paused = true;
         resetAndStopMusic();
         playMusic(this.currentPlay);
-        System.out.println("play");
     }
 
     public void setMusicVolume(float volume) {

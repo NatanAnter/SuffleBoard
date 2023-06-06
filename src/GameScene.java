@@ -21,7 +21,7 @@ public class GameScene extends JPanel implements KeyListener, ActionListener, Ch
     public static final int WINNER_HEIGHT = 400;
     public static final int SPACING = 20;
     public static final double FRICTION_K = 0;
-    public static final int NUMBER_OF_DISKETTES = 30;
+    public static final int NUMBER_OF_DISKETTES = 15;
     public static final String PLAYER_RED_WON_LOCATION = "redWon.png";
     public static final String PLAYER_BLUE_WON_LOCATION = "blueWon.png";
     private final BufferedImage playerRedWon;
