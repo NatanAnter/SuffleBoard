@@ -317,7 +317,7 @@ public class Puck extends Thread {
     }
 
     public void paint(Graphics graphics) {
-        
+
         AffineTransform at = AffineTransform.getTranslateInstance(x /*- img.getWidth() * 0.5 * multiplier*/, y /*- img.getHeight() * multiplier*/);
         double multiplier = (double) this.size / img.getHeight();
         at.rotate(Math.toRadians(this.degrees), img.getWidth() * 0.5 * multiplier, img.getHeight() * 0.5 * multiplier);

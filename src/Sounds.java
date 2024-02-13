@@ -1,18 +1,25 @@
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.*;
 import java.util.*;
 
 public class Sounds {
     public static final String[] MUSIC_FOLDERS_NAMES = {"gameBackgroundMusic", "gameBoosMusic", "homeBackgroundMusic", "homeWinnerMusic"};
     public static final String[] SOUND_EFFECTS_FOLDERS_NAMES = {"collision", "falling", "shooting"};
     public static final String[] SOUNDS_EFFECTS_MAGIC_FOLDERS_NAMES = {"bombCollision", "bombSpell", "collision", "falling", "freezeSpell", "shooting"};
-    public static final String MUSIC_LOCATION = "resources\\music";
+    public static final String RESOURCES = "resources\\";
+    public static final String MUSIC_LOCATION = "music";
     private final List<List<Sound>> MUSIC;
     private final List<Integer> MUSIC_NUMBER;
     private int currentPlay;
-    public static final String SOUND_EFFECTS_LOCATION = "resources\\soundEffects";
+    public static final String SOUND_EFFECTS_LOCATION = "soundEffects";
     private final List<List<Sound>> SOUND_EFFECTS;
     private final List<Integer> SOUND_EFFECTS_NUMBER;
-    public static final String SOUND_EFFECTS_MAGIC_LOCATION = "resources\\soundEffectsMagic";
+    public static final String SOUND_EFFECTS_MAGIC_LOCATION = "soundEffectsMagic";
     private final List<List<Sound>> SOUND_EFFECTS_MAGIC;
     private final List<Integer> SOUND_EFFECTS_MAGIC_NUMBER;
     private boolean paused;
@@ -20,11 +27,11 @@ public class Sounds {
     private float soundVolume;
 
     public Sounds(float musicVolume, float soundVolume) {
-        this.MUSIC = loadSounds(new File(MUSIC_LOCATION), MUSIC_FOLDERS_NAMES);
+        this.MUSIC = loadSounds(MUSIC_LOCATION, MUSIC_FOLDERS_NAMES);
         this.MUSIC_NUMBER = setNumbers(MUSIC);
-        this.SOUND_EFFECTS = loadSounds(new File(SOUND_EFFECTS_LOCATION), SOUND_EFFECTS_FOLDERS_NAMES);
+        this.SOUND_EFFECTS = loadSounds(SOUND_EFFECTS_LOCATION, SOUND_EFFECTS_FOLDERS_NAMES);
         this.SOUND_EFFECTS_NUMBER = setNumbers(SOUND_EFFECTS);
-        this.SOUND_EFFECTS_MAGIC = loadSounds(new File(SOUND_EFFECTS_MAGIC_LOCATION), SOUNDS_EFFECTS_MAGIC_FOLDERS_NAMES);
+        this.SOUND_EFFECTS_MAGIC = loadSounds(SOUND_EFFECTS_MAGIC_LOCATION, SOUNDS_EFFECTS_MAGIC_FOLDERS_NAMES);
         this.SOUND_EFFECTS_MAGIC_NUMBER = setNumbers(SOUND_EFFECTS_MAGIC);
         this.paused = false;
         this.musicVolume = musicVolume;
@@ -32,8 +39,45 @@ public class Sounds {
 
     }
 
-    public List<List<Sound>> loadSounds(File folder, String[] foldersNames) {
+    public List<List<Sound>> loadSounds(String folderPath, String[] foldersNames) {
+        if(Window.PROTOCOL.equals("jar")){
+            List<List<Sound>> allMusic = new ArrayList<>();
+            ClassLoader classLoader = getClass().getClassLoader();
+            for (String innerFolderName : foldersNames) {
+                try {
+                    Enumeration<URL> resources = classLoader.getResources(folderPath + "/" + innerFolderName);
+                    List<Sound> musicLevel = new ArrayList<>();
+                    while (resources.hasMoreElements()) {
+                        URL url = resources.nextElement();
+                        URI uri = url.toURI();
+                        String scheme = uri.getScheme();
+                        if (scheme.equals("jar")) {
+                            try (FileSystem fileSystem = FileSystems.newFileSystem(uri, Collections.<String, Object>emptyMap())) {
+                                Path jarPath = fileSystem.getPath("/"+folderPath+"/" + innerFolderName);
+                                Files.walk(jarPath, 1).forEach(path -> {
+                                    if (!Files.isDirectory(path)) {
+                                        musicLevel.add(new Sound(path.toString()));
+                                    }
+                                });
+                            }
+                        } else {
+                            Files.list(Paths.get(uri)).forEach(path -> {
+                                if (Files.isRegularFile(path)) {
+                                    musicLevel.add(new Sound(path.toString()));
+                                }
+                            });
+                        }
+                    }
+                    allMusic.add(musicLevel);
+                } catch (URISyntaxException | IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            System.out.println("allMusic: " + allMusic);
+            return allMusic;
+        }
         List<List<Sound>> allMusic = new ArrayList<>();
+        File folder = new File(RESOURCES + folderPath);
         for (String innerFolderName : foldersNames) {
             File innerFolder = new File(folder.getPath() + "\\" + innerFolderName);
             if (innerFolder.isDirectory()) {

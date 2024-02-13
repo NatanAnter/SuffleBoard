@@ -4,9 +4,11 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 
 public class Utils {
     public static final String IMAGES_LOCATIONS = "resources\\images\\";
+    public static final String IMAGES_JAR_LOCATIONS = "/images/";
 
     public static void sleep(int milliSecond) {
         try {
@@ -24,10 +26,20 @@ public class Utils {
 
     public static BufferedImage loadImage(String fileName) {
         BufferedImage img = null;
-        try {
-            img = ImageIO.read(new File(IMAGES_LOCATIONS + fileName));
-        } catch (IOException e) {
-            JOptionPane.showConfirmDialog(null, IMAGES_LOCATIONS + fileName + "  " + e, "didnt find image", JOptionPane.YES_NO_OPTION);
+        if(Window.PROTOCOL.equals("jar")) {
+            try {
+                InputStream imageStream = Utils.class.getResourceAsStream(IMAGES_JAR_LOCATIONS + fileName );
+                img = ImageIO.read(imageStream);
+            } catch (Exception e) {
+                JOptionPane.showConfirmDialog(null, IMAGES_JAR_LOCATIONS + fileName + "  " + e, "didnt find image", JOptionPane.YES_NO_OPTION);
+            }
+        }
+        else {
+            try {
+                img = ImageIO.read(new File(IMAGES_LOCATIONS + fileName));
+            } catch (IOException e) {
+                JOptionPane.showConfirmDialog(null, IMAGES_LOCATIONS + fileName + "  " + e, "didnt find image", JOptionPane.YES_NO_OPTION);
+            }
         }
         return img;
     }

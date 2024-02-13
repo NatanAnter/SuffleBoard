@@ -1,0 +1,13 @@
+<component name="ArtifactManager">
+  <artifact name="ShuffleBoard:jar">
+    <output-path>$USER_HOME$/Desktop/New folder</output-path>
+    <root id="root">
+      <element id="archive" name="ShuffleBoard.jar">
+        <element id="directory" name="META-INF">
+          <element id="file-copy" path="$PROJECT_DIR$/resources/META-INF/MANIFEST.MF" />
+        </element>
+        <element id="module-output" name="ShuffleBoard" />
+      </element>
+    </root>
+  </artifact>
+</component>

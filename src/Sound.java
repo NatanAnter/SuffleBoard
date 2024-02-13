@@ -3,7 +3,9 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Clip;
 import javax.sound.sampled.FloatControl;
 import javax.swing.*;
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.InputStream;
 
 public class Sound {
     private final String fileName;
@@ -17,14 +19,28 @@ public class Sound {
 
     public void loadSound() {
         this.exist = true;
-        try {
-            File file = new File(fileName);
-            AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(file);
-            clip = AudioSystem.getClip();
-            clip.open(audioInputStream);
-        } catch (Exception e) {
-            JOptionPane.showConfirmDialog(null, e, "sound not found", JOptionPane.YES_NO_OPTION);
-            this.exist = false;
+        if(Window.PROTOCOL.equals("jar")){
+            try {
+                InputStream stream = getClass().getResourceAsStream(fileName);
+                BufferedInputStream bufferedStream = new BufferedInputStream(stream);
+                AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(bufferedStream);
+                clip = AudioSystem.getClip();
+                clip.open(audioInputStream);
+            } catch (Exception e) {
+                e.printStackTrace();
+                this.exist = false;
+            }
+        }
+        else {
+            try {
+                File file = new File(fileName);
+                AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(file);
+                clip = AudioSystem.getClip();
+                clip.open(audioInputStream);
+            } catch (Exception e) {
+                e.printStackTrace();
+                this.exist = false;
+            }
         }
 
     }
