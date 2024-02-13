@@ -1,4 +1,4 @@
-# Shuffleboard Game
+# Shuffleboard Game 
 
 Welcome to the Shuffleboard Game! This is a digital version of the classic tabletop game where players use cues to push weighted discs, aiming to score points by landing them within marked scoring areas at the opposite end of the board.
 
