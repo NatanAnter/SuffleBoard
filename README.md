@@ -38,7 +38,15 @@ To play the Shuffleboard Game:
 
 ## Screenshots
 
-![Gameplay Screenshot](https://github.com/NatanAnter/SuffleBoard/tree/master/resources/images/board.png)
+![Gameplay Screenshot](https://github.com/NatanAnter/SuffleBoard/tree/master/resources/images/ScreenshotClassic.png)
+
+![Gameplay Screenshot](https://github.com/NatanAnter/SuffleBoard/tree/master/resources/images/ScreenshotClassic2.png)
+
+![Gameplay Screenshot](https://github.com/NatanAnter/SuffleBoard/tree/master/resources/images/ScreenshotNewVersion.png)
+
+![Gameplay Screenshot](https://github.com/NatanAnter/SuffleBoard/tree/master/resources/images/ScreenshotIceSpell.png)
+
+
 ## Technologies Used
 
 - java
