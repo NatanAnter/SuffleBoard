@@ -41,20 +41,17 @@ To play the Shuffleboard Game:
 ![Gameplay Screenshot](https://github.com/NatanAnter/SuffleBoard/resources/images/board.png)
 ## Technologies Used
 
-- HTML5
-- CSS3
-- JavaScript
+- java
 
 ## Credits
 
-This Shuffleboard Game was created by [Your Name] as a project for [Your Course/Program].
+This Shuffleboard Game was created by Natan Anter as a project for my class.
 
-## License
-
-This project is licensed under the [MIT License](LICENSE).
 
 ## Feedback and Contributions
 
 Feedback and contributions are welcome! If you have any suggestions, bug reports, or would like to contribute to the project, please open an issue or create a pull request.
+
+natananter@gmail.com
 
 Enjoy playing Shuffleboard!
